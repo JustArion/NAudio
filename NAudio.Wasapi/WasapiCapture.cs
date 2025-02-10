@@ -97,27 +97,27 @@ namespace NAudio.CoreAudioApi
         public static async Task<WasapiCapture> CreateForProcessCaptureAsync(int processId, bool includeProcessTree)
         {
             // https://github.com/microsoft/Windows-classic-samples/blob/main/Samples/ApplicationLoopback/cpp/LoopbackCapture.cpp
-            var activationParams = new AudioClientActivationParams()
+            var activationParams = new AudioClientActivationParams
             {
                 ActivationType = AudioClientActivationType.ProcessLoopback,
-                ProcessLoopbackParams = new AudioClientProcessLoopbackParams()
+                ProcessLoopbackParams = new AudioClientProcessLoopbackParams
                 {
                     ProcessLoopbackMode = includeProcessTree ? ProcessLoopbackMode.IncludeTargetProcessTree : 
                         ProcessLoopbackMode.ExcludeTargetProcessTree,
                     TargetProcessId = (uint)processId
                 }
             };
-            var blobData = Marshal.AllocHGlobal(Marshal.SizeOf(activationParams));
+            var hBlobData = GCHandle.Alloc(activationParams, GCHandleType.Pinned);
             try
             {
-                Marshal.StructureToPtr(activationParams, blobData, false);
-                var activateParams = new PropVariant()
+                var data = hBlobData.AddrOfPinnedObject();
+                var activateParams = new PropVariant
                 {
                     vt = (short)VarEnum.VT_BLOB,
-                    blobVal = new Blob()
+                    blobVal = new Blob
                     {
                         Length = Marshal.SizeOf(activationParams),
-                        Data = blobData
+                        Data = data
                     }
                 };
                 WasapiCapture capture = null;
@@ -127,24 +127,21 @@ namespace NAudio.CoreAudioApi
                     capture.audioClientStreamFlags |= AudioClientStreamFlags.Loopback;
                     capture.WaveFormat = new WaveFormat(); // ask for capture at 44.1, stereo 16 bit
                 });
-                var IID_IAudioClient = new Guid("1CB9AD4C-DBFA-4c32-B178-C2F568A703B2");
-                var propVariant = Marshal.AllocHGlobal(Marshal.SizeOf(activateParams));
+                var hActivateParams = GCHandle.Alloc(activateParams, GCHandleType.Pinned);
                 try
                 {
-                    Marshal.StructureToPtr(activateParams, propVariant, false);
-                    NativeMethods.ActivateAudioInterfaceAsync(VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK, IID_IAudioClient, propVariant,
-                        icbh, out var activationOperation);
+                    NativeMethods.ActivateAudioInterfaceAsync(VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK, typeof(IAudioClient).GUID, hActivateParams.AddrOfPinnedObject(), icbh, out var activationOperation);
                     var audioClientInterface = await icbh;
                     return capture;
                 }
                 finally
                 {
-                    Marshal.FreeHGlobal(propVariant);
+                    hActivateParams.Free();
                 }
             }
             finally
             {
-                Marshal.FreeHGlobal(blobData);
+                hBlobData.Free();
             }
         }
         
