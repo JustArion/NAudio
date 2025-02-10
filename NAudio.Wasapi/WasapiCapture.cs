@@ -234,6 +234,7 @@ namespace NAudio.CoreAudioApi
             {
                 var fallbackSize = FALLBACK_BUFFER_LENGTH * bytesPerFrame;
                 // System.Diagnostics.Debug.WriteLine("Buffer Size is faulted, The size is {0}, using fallback size instead {1}", bufferSize, fallbackSize);
+                // Console.WriteLine("[!] Playback Buffer is Faulted");
                 bufferSize = fallbackSize;
             }
             
