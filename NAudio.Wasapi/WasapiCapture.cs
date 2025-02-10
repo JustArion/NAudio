@@ -18,6 +18,7 @@ namespace NAudio.CoreAudioApi
     {
         private const long ReftimesPerSec = 10000000;
         private const long ReftimesPerMillisec = 10000;
+        private const int FALLBACK_BUFFER_LENGTH = 10000;
         private volatile CaptureState captureState;
         private byte[] recordBuffer;
         private Thread captureThread;
@@ -227,7 +228,16 @@ namespace NAudio.CoreAudioApi
 
             var bufferFrameCount = audioClient.BufferSize;
             bytesPerFrame = waveFormat.Channels * waveFormat.BitsPerSample / 8;
-            recordBuffer = new byte[bufferFrameCount * bytesPerFrame];
+            var bufferSize = bufferFrameCount * bytesPerFrame;
+
+            if (bufferSize < 1)
+            {
+                var fallbackSize = FALLBACK_BUFFER_LENGTH * bytesPerFrame;
+                // System.Diagnostics.Debug.WriteLine("Buffer Size is faulted, The size is {0}, using fallback size instead {1}", bufferSize, fallbackSize);
+                bufferSize = fallbackSize;
+            }
+            
+            recordBuffer = new byte[bufferSize];
             
             //Debug.WriteLine(string.Format("record buffer size = {0}", this.recordBuffer.Length));
 
@@ -291,6 +301,8 @@ namespace NAudio.CoreAudioApi
         {
             //Debug.WriteLine(String.Format("Client buffer frame count: {0}", client.BufferSize));
             var bufferFrameCount = client.BufferSize;
+            if (bufferFrameCount < 1) // BufferSize is faulted
+                bufferFrameCount = FALLBACK_BUFFER_LENGTH;
 
             // Calculate the actual duration of the allocated buffer.
             var actualDuration = (long)((double)ReftimesPerSec *
