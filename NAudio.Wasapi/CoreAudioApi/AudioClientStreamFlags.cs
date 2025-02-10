@@ -2,6 +2,8 @@
 
 namespace NAudio.CoreAudioApi
 {
+    using System.Runtime.InteropServices;
+
     /// <summary>
     /// AUDCLNT_STREAMFLAGS
     /// https://docs.microsoft.com/en-us/windows/win32/coreaudio/audclnt-streamflags-xxx-constants
@@ -54,13 +56,12 @@ namespace NAudio.CoreAudioApi
            
     }
 
-    /* not currently used
-
     /// <summary>
     /// AUDIOCLIENT_ACTIVATION_PARAMS
     /// https://docs.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ns-audioclientactivationparams-audioclient_activation_params
     /// </summary>
-    struct AudioClientActivationParams
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AudioClientActivationParams
     {
         public AudioClientActivationType ActivationType;
         public AudioClientProcessLoopbackParams ProcessLoopbackParams;
@@ -71,7 +72,8 @@ namespace NAudio.CoreAudioApi
     /// AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS
     /// https://docs.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ns-audioclientactivationparams-audioclient_process_loopback_params
     /// </summary>
-    struct AudioClientProcessLoopbackParams
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AudioClientProcessLoopbackParams
     {
         /// <summary>
         /// AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS
@@ -81,13 +83,11 @@ namespace NAudio.CoreAudioApi
         public ProcessLoopbackMode ProcessLoopbackMode;
     }
 
-    */
-
     /// <summary>
     /// PROCESS_LOOPBACK_MODE
     /// https://docs.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ne-audioclientactivationparams-process_loopback_mode
     /// </summary>
-    enum ProcessLoopbackMode
+    public enum ProcessLoopbackMode
     {
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace NAudio.CoreAudioApi
     /// AUDIOCLIENT_ACTIVATION_TYPE
     /// https://docs.microsoft.com/en-us/windows/win32/api/audioclientactivationparams/ne-audioclientactivationparams-audioclient_activation_type
     /// </summary>
-    enum AudioClientActivationType
+    public enum AudioClientActivationType
     {
         /// <summary>
         /// AUDIOCLIENT_ACTIVATION_TYPE_DEFAULT

@@ -4,6 +4,8 @@ using NAudio.CoreAudioApi;
 // ReSharper disable once CheckNamespace
 namespace NAudio.Wave
 {
+    using System.Diagnostics;
+
     /// <summary>
     /// WASAPI Loopback Capture
     /// based on a contribution from "Pygmy" - http://naudio.codeplex.com/discussions/203605

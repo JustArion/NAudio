@@ -25,7 +25,7 @@ namespace NAudio.CoreAudioApi
         /// </summary>
         public static async Task<AudioClient> ActivateAsync(string deviceInterfacePath, AudioClientProperties? audioClientProperties)
         {
-            var icbh = new ActivateAudioInterfaceCompletionHandler(
+            var icbh = new ActivateAudioInterfaceCompletionHandler<IAudioClient2>(
                 ac2 =>
                 {
 
@@ -50,8 +50,7 @@ namespace NAudio.CoreAudioApi
                                AudioClientStreamFlags.EventCallback | AudioClientStreamFlags.NoPersist,
                                10000000, 0, wfx, IntPtr.Zero);*/
                 });
-            var IID_IAudioClient2 = new Guid("726778CD-F60A-4eda-82DE-E47610CD78AA");
-            NativeMethods.ActivateAudioInterfaceAsync(deviceInterfacePath, IID_IAudioClient2, IntPtr.Zero, icbh, out var activationOperation);
+            NativeMethods.ActivateAudioInterfaceAsync(deviceInterfacePath, typeof(IAudioClient2).GUID, IntPtr.Zero, icbh, out var activationOperation);
             var audioClient2 = await icbh;
             return new AudioClient((IAudioClient)audioClient2);
         }
