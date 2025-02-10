@@ -78,6 +78,7 @@ namespace NAudio.CoreAudioApi
         public WasapiCapture(MMDevice captureDevice, bool useEventSync, int audioBufferMillisecondsLength)
             : this(captureDevice.AudioClient, useEventSync, audioBufferMillisecondsLength)
         {
+            waveFormat = audioClient.MixFormat;
         }
 
 
@@ -90,7 +91,6 @@ namespace NAudio.CoreAudioApi
             this.audioBufferMillisecondsLength = audioBufferMillisecondsLength;
             // enable auto-convert PCM
             this.audioClientStreamFlags = AudioClientStreamFlags.AutoConvertPcm | AudioClientStreamFlags.SrcDefaultQuality;
-            waveFormat = audioClient.MixFormat;
         }
 
         public static async Task<WasapiCapture> CreateForProcessCaptureAsync(int processId, bool includeProcessTree)
