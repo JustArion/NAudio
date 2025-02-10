@@ -107,8 +107,10 @@ namespace NAudio.CoreAudioApi
         {
             get
             {
-                Marshal.ThrowExceptionForHR(audioClientInterface.GetBufferSize(out uint bufferSize));
-                return (int) bufferSize;
+                var result = audioClientInterface.GetBufferSize(out var bufferSize);
+                Marshal.ThrowExceptionForHR(result);
+                var retVal = (int)bufferSize; // Allows for setting a breakpoint on an invalid value ( < 1 )
+                return retVal;
             }
         }
 
@@ -267,6 +269,15 @@ namespace NAudio.CoreAudioApi
             IntPtr pointerToPtr = GetPointerToPointer(); // IntPtr.Zero; // Marshal.AllocHGlobal(Marshal.SizeOf<WaveFormatExtensible>());
             closestMatchFormat = null;
             int hresult = audioClientInterface.IsFormatSupported(shareMode, desiredFormat, pointerToPtr);
+
+            // -2147467263 0x80004001
+            // E_NOTIMPL
+            // Since the HRESULT isn't checked until after we read the pointer previously
+            // the pointer is uninitialized memory and dereferencing it throws an AV exception
+            if (hresult == -0x7FFFBFFF)
+            {
+                return false;
+            }
 
             var closestMatchPtr = Marshal.PtrToStructure<IntPtr>(pointerToPtr);
 
